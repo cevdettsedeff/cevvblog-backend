@@ -6,7 +6,7 @@ import { IAuthService } from "../../core/interfaces/Services/IAuthService";
 import { IUserRepository } from "../../core/interfaces/Repositories/IUserRepository ";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../../core/container/types";
-import bcrypt from 'bcryptjs';
+const bcrypt = require('bcryptjs');
 import { config } from "../../config/env";
 import { UserRole } from "../../domain/enums/UserRole";
 import { ConflictError, ForbiddenError, UnauthorizedError } from "../../core/errors";
