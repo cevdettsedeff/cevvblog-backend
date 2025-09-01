@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { IUnitOfWork } from "../core/interfaces/IUnitOfWork";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../core/container/types";
-import { IUserRepository } from "../core/interfaces/Repositories/IUserRepository ";
+import { IUserRepository } from "../core/interfaces/Repositories/IUserRepository";
 import { ICategoryRepository } from "../core/interfaces/Repositories/ICategoryRepository";
 import { IBlogPostRepository } from "../core/interfaces/Repositories/IBlogPostRepository";
 import { ICommentRepository } from "../core/interfaces/Repositories/ICommentRepository";
@@ -26,12 +26,12 @@ export class UnitOfWork implements IUnitOfWork {
       throw new Error('Transaction already started');
     }
     
-    this.transactionClient = await new Promise<PrismaTransactionClient>((resolve, reject) => {
-      this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
-        resolve(tx);
-        return tx;
-      }).catch(reject);
-    });
+    // this.transactionClient = await new Promise<PrismaTransactionClient>((resolve, reject) => {
+    //   this.prisma.$transaction(async (tx: PrismaTransactionClient) => {
+    //     resolve(tx);
+    //     return tx;
+    //   }).catch(reject);
+    // });
     
     // Set transaction client on repositories
     //this.users.setTransactionClient(this.transactionClient);

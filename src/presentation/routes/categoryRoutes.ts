@@ -1,14 +1,17 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { TYPES } from "../../core/container/types";
-import { requireRole } from "../../core/middleware/auth";
+import { 
+  authenticate, 
+  adminOnly 
+} from "../../core/middleware/auth";
 import { CategoryRoutesSchema } from "../../schemas/routes/categoryRoutesSchema";
 import { validateBody } from "../../core/middleware/validation";
 import { categorySchemas } from "../../application/validators/schemas";
-import { DIContainer } from "../../core/container/DIContainer";
 import { CategoryController } from "../controllers/CategoryController";
+import { DIContainer } from "../../core/container/DIContainer";
 
 export async function registerCategoryRoutes(fastify: FastifyInstance) {
-  const categoryController = DIContainer.get(TYPES.CategoryController) as CategoryController;
+  const categoryController = DIContainer.get<CategoryController>(TYPES.CategoryController);
 
   // Public routes
   fastify.get('/', {
@@ -51,8 +54,8 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
   fastify.post('/', {
     schema: CategoryRoutesSchema.CreateCategory.schema,
     preHandler: [
-      fastify.authenticate,
-      requireRole(['ADMIN']),
+      authenticate,
+      adminOnly,
       validateBody(categorySchemas.create)
     ],
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -63,8 +66,8 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
   fastify.put('/:id', {
     schema: CategoryRoutesSchema.UpdateCategory.schema,
     preHandler: [
-      fastify.authenticate,
-      requireRole(['ADMIN']),
+      authenticate,
+      adminOnly,
       validateBody(categorySchemas.update)
     ],
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -75,8 +78,8 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
   fastify.delete('/:id', {
     schema: CategoryRoutesSchema.DeleteCategory.schema,
     preHandler: [
-      fastify.authenticate,
-      requireRole(['ADMIN'])
+      authenticate,
+      adminOnly
     ],
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
       return categoryController.deleteCategory(request, reply);
@@ -86,8 +89,8 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
   fastify.put('/:id/sort-order', {
     schema: CategoryRoutesSchema.UpdateSortOrder.schema,
     preHandler: [
-      fastify.authenticate,
-      requireRole(['ADMIN']),
+      authenticate,
+      adminOnly,
       validateBody(categorySchemas.sortOrder)
     ],
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -95,25 +98,25 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // ✅ Bulk sort order update - Controller'a taşındı
+  // Bulk sort order update
   fastify.put('/bulk-sort-order', {
     schema: CategoryRoutesSchema.BulkUpdateSortOrder.schema,
     preHandler: [
-      fastify.authenticate,
-      requireRole(['ADMIN']),
-      validateBody(categorySchemas.bulkSortOrder) // Bu schema'yı da eklemelisin
+      authenticate,
+      adminOnly,
+      validateBody(categorySchemas.bulkSortOrder)
     ],
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
       return categoryController.bulkUpdateSortOrder(request, reply);
     }
   });
 
-  // ✅ Category stats - Controller'a taşındı  
+  // Category stats  
   fastify.get('/admin/stats', {
     schema: CategoryRoutesSchema.GetCategoryStats.schema,
     preHandler: [
-      fastify.authenticate,
-      requireRole(['ADMIN'])
+      authenticate,
+      adminOnly
     ],
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
       return categoryController.getCategoryStats(request, reply);

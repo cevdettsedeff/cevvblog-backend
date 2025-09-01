@@ -1,3 +1,5 @@
+import { UserRole } from "@prisma/client";
+
 export interface AuthResponseDto {
   user: {
     id: string;
@@ -5,8 +7,9 @@ export interface AuthResponseDto {
     username: string;
     firstName: string;
     lastName: string;
-    role: string;
+    role: UserRole;
     avatar?: string;
   };
-  token: string;
+  accessToken: string;
+  refreshToken: string;
 }

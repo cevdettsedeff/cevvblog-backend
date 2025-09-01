@@ -1,4 +1,3 @@
-// DI Container Configuration (core/container/DIContainer.ts)
 import { Container } from 'inversify';
 import { PrismaClient } from '@prisma/client';
 import { TYPES } from './types';
@@ -10,7 +9,7 @@ import { CommentRepository } from '../../infrastructure/database/repositories/Co
 import { UserController } from '../../presentation/controllers/UserController';
 import { CommentController } from '../../presentation/controllers/CommentController';
 import { UnitOfWork } from '../../infrastructure/UnitOfWork';
-import { IUserRepository } from '../interfaces/Repositories/IUserRepository ';
+import { IUserRepository } from '../interfaces/Repositories/IUserRepository';
 import { ICategoryRepository } from '../interfaces/Repositories/ICategoryRepository';
 import { IBlogPostRepository } from '../interfaces/Repositories/IBlogPostRepository';
 import { ICommentRepository } from '../interfaces/Repositories/ICommentRepository';

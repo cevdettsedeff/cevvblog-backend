@@ -1,3 +1,5 @@
+// schema.prisma - Düzeltilmiş versiyon
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -22,8 +24,10 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  blogPosts BlogPost[]
-  comments  Comment[]
+  blogPosts         BlogPost[]
+  comments          Comment[]
+  refreshTokens     RefreshToken[]
+  blacklistedTokens TokenBlacklist[]
 
   @@map("users")
 }
@@ -33,8 +37,8 @@ model Category {
   name        String   @unique
   slug        String   @unique
   description String?
-  color       String?  // Navbar'da renk için
-  icon        String?  // Icon class name
+  color       String?
+  icon        String?
   isActive    Boolean  @default(true)
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
@@ -47,20 +51,20 @@ model Category {
 }
 
 model BlogPost {
-  id           String      @id @default(cuid())
-  title        String
-  slug         String      @unique
-  excerpt      String?
-  content      String
+  id            String     @id @default(cuid())
+  title         String
+  slug          String     @unique
+  excerpt       String?
+  content       String
   featuredImage String?
-  images       String[]    // JSON array of image URLs
-  tags         String[]    // JSON array of tags
-  status       PostStatus  @default(DRAFT)
-  viewCount    Int         @default(0)
-  isPublished  Boolean     @default(false)
-  publishedAt  DateTime?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  images        String[]
+  tags          String[]
+  status        PostStatus @default(DRAFT)
+  viewCount     Int        @default(0)
+  isPublished   Boolean    @default(false)
+  publishedAt   DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
   // Foreign Keys
   authorId   String
@@ -85,7 +89,7 @@ model Comment {
   // Foreign Keys
   authorId   String
   blogPostId String
-  parentId   String? // For nested comments
+  parentId   String?
 
   // Relations
   author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
@@ -96,6 +100,30 @@ model Comment {
   @@map("comments")
 }
 
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+
+  @@map("refresh_tokens")
+}
+
+model TokenBlacklist {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@map("token_blacklist")
+}
+
+// Enums
 enum UserRole {
   ADMIN
   AUTHOR

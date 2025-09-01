@@ -1,6 +1,9 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { BlogPostController } from '../controllers/BlogPostController';
-import { requireRole } from '../../core/middleware/auth';
+import { 
+  authenticate, 
+  authorOrAdmin 
+} from '../../core/middleware/auth';
 import { validateBody } from '../../core/middleware/validation';
 import { blogPostSchemas } from '../../application/validators/schemas';
 import { BlogPostRoutesSchema } from '../../schemas/routes/blogPostRoutesSchema';
@@ -8,7 +11,7 @@ import { TYPES } from '../../core/container/types';
 import { DIContainer } from '../../core/container/DIContainer';
 
 export async function registerBlogPostRoutes(fastify: FastifyInstance) {
-  const blogPostController = DIContainer.get(TYPES.BlogPostController) as BlogPostController;
+  const blogPostController = DIContainer.get<BlogPostController>(TYPES.BlogPostController);
 
   // Public routes
   fastify.get('/', {
@@ -71,8 +74,8 @@ export async function registerBlogPostRoutes(fastify: FastifyInstance) {
   fastify.post('/', {
     schema: BlogPostRoutesSchema.CreatePost.schema,
     preHandler: [
-      fastify.authenticate, 
-      requireRole(['AUTHOR', 'ADMIN']),
+      authenticate, 
+      authorOrAdmin,
       validateBody(blogPostSchemas.create)
     ],
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -83,8 +86,8 @@ export async function registerBlogPostRoutes(fastify: FastifyInstance) {
   fastify.put('/:id', {
     schema: BlogPostRoutesSchema.UpdatePost.schema,
     preHandler: [
-      fastify.authenticate, 
-      requireRole(['AUTHOR', 'ADMIN']),
+      authenticate, 
+      authorOrAdmin,
       validateBody(blogPostSchemas.update)
     ],
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -95,8 +98,8 @@ export async function registerBlogPostRoutes(fastify: FastifyInstance) {
   fastify.delete('/:id', {
     schema: BlogPostRoutesSchema.DeletePost.schema,
     preHandler: [
-      fastify.authenticate, 
-      requireRole(['AUTHOR', 'ADMIN'])
+      authenticate, 
+      authorOrAdmin
     ],
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
       return blogPostController.deletePost(request, reply);
@@ -104,25 +107,25 @@ export async function registerBlogPostRoutes(fastify: FastifyInstance) {
   });
 
   fastify.post('/:id/upload-image', {
-  schema: BlogPostRoutesSchema.UploadImage.schema,
-  preHandler: [
-    fastify.authenticate, 
-    requireRole(['AUTHOR', 'ADMIN'])
-  ],
-  handler: async (request: FastifyRequest, reply: FastifyReply) => {
-    return blogPostController.uploadImage(request, reply);
-  }
-});
+    schema: BlogPostRoutesSchema.UploadImage.schema,
+    preHandler: [
+      authenticate, 
+      authorOrAdmin
+    ],
+    handler: async (request: FastifyRequest, reply: FastifyReply) => {
+      return blogPostController.uploadImage(request, reply);
+    }
+  });
 
-// Multiple images upload
-fastify.post('/:id/upload-images', {
-  schema: BlogPostRoutesSchema.UploadMultipleImages.schema,
-  preHandler: [
-    fastify.authenticate, 
-    requireRole(['AUTHOR', 'ADMIN'])
-  ],
-  handler: async (request: FastifyRequest, reply: FastifyReply) => {
-    return blogPostController.uploadMultipleImages(request, reply);
-  }
-});
+  // Multiple images upload
+  fastify.post('/:id/upload-images', {
+    schema: BlogPostRoutesSchema.UploadMultipleImages.schema,
+    preHandler: [
+      authenticate, 
+      authorOrAdmin
+    ],
+    handler: async (request: FastifyRequest, reply: FastifyReply) => {
+      return blogPostController.uploadMultipleImages(request, reply);
+    }
+  });
 }

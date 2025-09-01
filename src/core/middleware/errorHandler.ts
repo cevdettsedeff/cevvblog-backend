@@ -1,7 +1,7 @@
 import { FastifyError, FastifyRequest, FastifyReply } from 'fastify';
 import logger from '../../utils/logger';
 import { BaseError } from '../../core/errors';
-import { ErrorResponse } from '../interfaces/responses/ErrorResponse';
+import { ErrorResponse } from '../interfaces/Responses/ErrorResponse';
 
 
 

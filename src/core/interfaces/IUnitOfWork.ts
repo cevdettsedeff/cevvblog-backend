@@ -1,7 +1,7 @@
 import { IBlogPostRepository } from "./Repositories/IBlogPostRepository";
 import { ICategoryRepository } from "./Repositories/ICategoryRepository";
 import { ICommentRepository } from "./Repositories/ICommentRepository";
-import { IUserRepository } from "./Repositories/IUserRepository ";
+import { IUserRepository } from "./Repositories/IUserRepository";
 
 export interface IUnitOfWork {
   users: IUserRepository;

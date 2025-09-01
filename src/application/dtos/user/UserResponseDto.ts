@@ -1,4 +1,4 @@
-import { UserRole } from "../../../domain/enums/UserRole";
+import { UserRole } from "@prisma/client"; // Prisma enum'ını kullan
 
 export interface UserResponseDto {
   id: string;
@@ -8,7 +8,7 @@ export interface UserResponseDto {
   lastName: string;
   avatar?: string;
   bio?: string;
-  role: UserRole; // Use enum for consistency
+  role: UserRole;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
