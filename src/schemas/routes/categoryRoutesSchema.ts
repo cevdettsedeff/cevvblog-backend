@@ -9,14 +9,78 @@ export const CategoryRoutesSchema: IBaseSchema = {
       querystring: {
         type: "object",
         properties: {
-          page: { type: "integer", minimum: 1, default: 1 },
-          limit: { type: "integer", minimum: 1, maximum: 100, default: 50 },
-          sortBy: { type: "string", default: "sortOrder" },
-          sortOrder: { type: "string", enum: ["asc", "desc"], default: "asc" },
+          page: { 
+            type: "integer", 
+            minimum: 1, 
+            default: 1,
+            description: "Page number"
+          },
+          limit: { 
+            type: "integer", 
+            minimum: 1, 
+            maximum: 100, 
+            default: 50,
+            description: "Items per page"
+          },
+          sortBy: { 
+            type: "string", 
+            default: "sortOrder",
+            description: "Field to sort by"
+          },
+          sortOrder: { 
+            type: "string", 
+            enum: ["asc", "desc"], 
+            default: "asc",
+            description: "Sort direction"
+          },
+          filters: {
+            type: "string",
+            description: "JSON string for filtering"
+          }
         },
+        // Hiçbir field required değil - hepsi optional ve default değerleri var
       },
       response: {
-        200: CommonResponses.SuccessWithPagination,
+        200: {
+          description: "Categories retrieved successfully",
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            data: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  id: { type: "string" },
+                  name: { type: "string" },
+                  slug: { type: "string" },
+                  description: { type: "string" },
+                  color: { type: "string" },
+                  icon: { type: "string" },
+                  isActive: { type: "boolean" },
+                  sortOrder: { type: "number" },
+                  postsCount: { type: "number" },
+                  createdAt: { type: "string" },
+                  updatedAt: { type: "string" }
+                }
+              }
+            },
+            pagination: {
+              type: "object",
+              properties: {
+                currentPage: { type: "number" },
+                page: { type: "number" },
+                limit: { type: "number" },
+                total: { type: "number" },
+                totalPages: { type: "number" },
+                totalItems: { type: "number" },
+                itemsPerPage: { type: "number" },
+                hasNext: { type: "boolean" },
+                hasPrev: { type: "boolean" }
+              }
+            }
+          }
+        },
         500: CommonResponses.Error500,
       },
     },
@@ -27,7 +91,39 @@ export const CategoryRoutesSchema: IBaseSchema = {
       description: "Get active categories for navbar",
       tags: ["Categories"],
       response: {
-        200: CommonResponses.Success,
+        200: {
+          description: "Active categories retrieved successfully",
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            data: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  id: { type: "string" },
+                  name: { type: "string" },
+                  slug: { type: "string" },
+                  description: { type: "string" },
+                  color: { type: "string" },
+                  icon: { type: "string" },
+                  isActive: { type: "boolean" },
+                  sortOrder: { type: "number" },
+                  postsCount: { type: "number" },
+                  createdAt: { type: "string" },
+                  updatedAt: { type: "string" }
+                }
+              }
+            },
+            meta: {
+              type: "object",
+              properties: {
+                count: { type: "number" },
+                fetchedAt: { type: "string" }
+              }
+            }
+          }
+        },
         500: CommonResponses.Error500,
       },
     },
@@ -40,9 +136,34 @@ export const CategoryRoutesSchema: IBaseSchema = {
       params: {
         type: "object",
         properties: {
-          id: { type: "string" },
+          id: { type: "string", description: "Category ID" },
         },
         required: ["id"],
+      },
+      querystring: {
+        type: "object",
+        properties: {
+          page: { 
+            type: "integer", 
+            minimum: 1, 
+            default: 1 
+          },
+          limit: { 
+            type: "integer", 
+            minimum: 1, 
+            maximum: 50, 
+            default: 10 
+          },
+          sortBy: { 
+            type: "string", 
+            default: "publishedAt" 
+          },
+          sortOrder: { 
+            type: "string", 
+            enum: ["asc", "desc"], 
+            default: "desc" 
+          }
+        }
       },
       response: {
         200: CommonResponses.SuccessWithPagination,
@@ -59,7 +180,7 @@ export const CategoryRoutesSchema: IBaseSchema = {
       params: {
         type: "object",
         properties: {
-          id: { type: "string" },
+          id: { type: "string", description: "Category ID" },
         },
         required: ["id"],
       },
@@ -78,7 +199,7 @@ export const CategoryRoutesSchema: IBaseSchema = {
       params: {
         type: "object",
         properties: {
-          slug: { type: "string" },
+          slug: { type: "string", description: "Category slug" },
         },
         required: ["slug"],
       },
@@ -98,11 +219,36 @@ export const CategoryRoutesSchema: IBaseSchema = {
       body: {
         type: "object",
         properties: {
-          name: { type: "string", minLength: 2, maxLength: 50 },
-          description: { type: "string", maxLength: 200 },
-          color: { type: "string", pattern: "^#[0-9a-fA-F]{6}$" },
-          icon: { type: "string", maxLength: 50 },
-          sortOrder: { type: "integer", minimum: 0 },
+          name: { 
+            type: "string", 
+            minLength: 2, 
+            maxLength: 50,
+            description: "Category name"
+          },
+          description: { 
+            type: "string", 
+            maxLength: 200,
+            description: "Category description"
+          },
+          color: { 
+            type: "string", 
+            pattern: "^#[0-9a-fA-F]{6}$",
+            description: "Hex color code"
+          },
+          icon: { 
+            type: "string", 
+            maxLength: 50,
+            description: "Icon name"
+          },
+          sortOrder: { 
+            type: "integer", 
+            minimum: 0,
+            description: "Sort order"
+          },
+          isActive: {
+            type: "boolean",
+            description: "Is category active"
+          }
         },
         required: ["name"],
       },
@@ -124,19 +270,43 @@ export const CategoryRoutesSchema: IBaseSchema = {
       params: {
         type: "object",
         properties: {
-          id: { type: "string" },
+          id: { type: "string", description: "Category ID" },
         },
         required: ["id"],
       },
       body: {
         type: "object",
         properties: {
-          name: { type: "string", minLength: 2, maxLength: 50 },
-          description: { type: "string", maxLength: 200 },
-          color: { type: "string", pattern: "^#[0-9a-fA-F]{6}$" },
-          icon: { type: "string", maxLength: 50 },
-          sortOrder: { type: "integer", minimum: 0 },
-          isActive: { type: "boolean" },
+          name: { 
+            type: "string", 
+            minLength: 2, 
+            maxLength: 50,
+            description: "Category name"
+          },
+          description: { 
+            type: "string", 
+            maxLength: 200,
+            description: "Category description"
+          },
+          color: { 
+            type: "string", 
+            pattern: "^#[0-9a-fA-F]{6}$",
+            description: "Hex color code"
+          },
+          icon: { 
+            type: "string", 
+            maxLength: 50,
+            description: "Icon name"
+          },
+          sortOrder: { 
+            type: "integer", 
+            minimum: 0,
+            description: "Sort order"
+          },
+          isActive: { 
+            type: "boolean",
+            description: "Is category active"
+          },
         },
       },
       response: {
@@ -158,7 +328,7 @@ export const CategoryRoutesSchema: IBaseSchema = {
       params: {
         type: "object",
         properties: {
-          id: { type: "string" },
+          id: { type: "string", description: "Category ID" },
         },
         required: ["id"],
       },
@@ -180,14 +350,18 @@ export const CategoryRoutesSchema: IBaseSchema = {
       params: {
         type: "object",
         properties: {
-          id: { type: "string" },
+          id: { type: "string", description: "Category ID" },
         },
         required: ["id"],
       },
       body: {
         type: "object",
         properties: {
-          sortOrder: { type: "integer", minimum: 0 },
+          sortOrder: { 
+            type: "integer", 
+            minimum: 0,
+            description: "New sort order"
+          },
         },
         required: ["sortOrder"],
       },
@@ -229,11 +403,18 @@ export const CategoryRoutesSchema: IBaseSchema = {
             items: {
               type: "object",
               properties: {
-                id: { type: "string" },
-                sortOrder: { type: "integer", minimum: 0 },
+                id: { type: "string", description: "Category ID" },
+                sortOrder: { 
+                  type: "integer", 
+                  minimum: 0,
+                  description: "New sort order"
+                },
               },
               required: ["id", "sortOrder"],
             },
+            minItems: 1,
+            maxItems: 50,
+            description: "Array of categories to update"
           },
         },
         required: ["categories"],
@@ -243,6 +424,74 @@ export const CategoryRoutesSchema: IBaseSchema = {
         400: CommonResponses.Error400,
         401: CommonResponses.Error401,
         403: CommonResponses.Error403,
+        500: CommonResponses.Error500,
+      },
+    },
+  },
+
+  GetPopularCategories: {
+    schema: {
+      description: "Get popular categories by post count",
+      tags: ["Categories"],
+      querystring: {
+        type: "object",
+        properties: {
+          limit: { 
+            type: "integer", 
+            minimum: 1, 
+            maximum: 20, 
+            default: 10,
+            description: "Number of categories to return"
+          }
+        }
+      },
+      response: {
+        200: {
+          description: "Popular categories retrieved successfully",
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            data: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  id: { type: "string" },
+                  name: { type: "string" },
+                  slug: { type: "string" },
+                  postsCount: { type: "number" },
+                  isActive: { type: "boolean" },
+                  sortOrder: { type: "number" }
+                }
+              }
+            }
+          }
+        },
+        500: CommonResponses.Error500,
+      },
+    },
+  },
+
+  GetCategoriesCount: {
+    schema: {
+      description: "Get total categories count statistics",
+      tags: ["Categories"],
+      response: {
+        200: {
+          description: "Categories count retrieved successfully",
+          type: "object",
+          properties: {
+            success: { type: "boolean" },
+            data: {
+              type: "object",
+              properties: {
+                total: { type: "number", description: "Total categories" },
+                active: { type: "number", description: "Active categories" },
+                inactive: { type: "number", description: "Inactive categories" }
+              }
+            }
+          }
+        },
         500: CommonResponses.Error500,
       },
     },

@@ -9,4 +9,10 @@ export interface ICategoryService extends IService<CategoryResponseDto, CreateCa
   updateSortOrder(categoryId: string, sortOrder: number): Promise<void>;
   getCategoryStats(): Promise<any[]>;
   bulkUpdateSortOrder(categories: Array<{ id: string; sortOrder: number }>): Promise<void>;
+  getPopularCategories(limit?: number): Promise<CategoryResponseDto[]>;
+  getCategoriesCount(): Promise<{
+    total: number;
+    active: number;
+    inactive: number;
+  }>;
 }

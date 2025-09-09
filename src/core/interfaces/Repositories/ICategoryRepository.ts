@@ -6,4 +6,10 @@ export interface ICategoryRepository extends IRepository<Category> {
   findActive(): Promise<Category[]>;
   updateSortOrder(categoryId: string, sortOrder: number): Promise<void>;
   findWithPostCount(): Promise<Category[]>;
+  findPopular(limit: number): Promise<Category[]>;
+  getCategoryCounts(): Promise<{
+    total: number;
+    active: number;
+    inactive: number;
+  }>;
 }

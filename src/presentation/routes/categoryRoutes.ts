@@ -14,6 +14,8 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
   const categoryController = DIContainer.get<CategoryController>(TYPES.CategoryController);
 
   // Public routes
+  
+  // GET /api/categories - Get all categories with pagination
   fastify.get('/', {
     schema: CategoryRoutesSchema.GetAllCategories.schema,
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -21,6 +23,7 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // GET /api/categories/active - Get active categories (for navbar)
   fastify.get('/active', {
     schema: CategoryRoutesSchema.GetActiveCategories.schema,
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -28,6 +31,23 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // GET /api/categories/popular - Get popular categories by post count
+  fastify.get('/popular', {
+    schema: CategoryRoutesSchema.GetPopularCategories.schema,
+    handler: async (request: FastifyRequest, reply: FastifyReply) => {
+      return categoryController.getPopularCategories(request, reply);
+    }
+  });
+
+  // GET /api/categories/count - Get categories count statistics
+  fastify.get('/count', {
+    schema: CategoryRoutesSchema.GetCategoriesCount.schema,
+    handler: async (request: FastifyRequest, reply: FastifyReply) => {
+      return categoryController.getCategoriesCount(request, reply);
+    }
+  });
+
+  // GET /api/categories/:id - Get category by ID
   fastify.get('/:id', {
     schema: CategoryRoutesSchema.GetCategoryById.schema,
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -35,6 +55,7 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // GET /api/categories/slug/:slug - Get category by slug
   fastify.get('/slug/:slug', {
     schema: CategoryRoutesSchema.GetCategoryBySlug.schema,
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -42,7 +63,7 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Get posts by category
+  // GET /api/categories/:id/posts - Get posts by category
   fastify.get('/:id/posts', {
     schema: CategoryRoutesSchema.GetCategoryPosts.schema,
     handler: async (request: FastifyRequest, reply: FastifyReply) => {
@@ -51,6 +72,8 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
   });
 
   // Admin only routes
+  
+  // POST /api/categories - Create new category (Admin only)
   fastify.post('/', {
     schema: CategoryRoutesSchema.CreateCategory.schema,
     preHandler: [
@@ -63,6 +86,7 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // PUT /api/categories/:id - Update category (Admin only)
   fastify.put('/:id', {
     schema: CategoryRoutesSchema.UpdateCategory.schema,
     preHandler: [
@@ -75,6 +99,7 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // DELETE /api/categories/:id - Delete category (Admin only)
   fastify.delete('/:id', {
     schema: CategoryRoutesSchema.DeleteCategory.schema,
     preHandler: [
@@ -86,6 +111,7 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
     }
   });
 
+  // PUT /api/categories/:id/sort-order - Update category sort order (Admin only)
   fastify.put('/:id/sort-order', {
     schema: CategoryRoutesSchema.UpdateSortOrder.schema,
     preHandler: [
@@ -98,7 +124,7 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Bulk sort order update
+  // PUT /api/categories/bulk-sort-order - Bulk update sort orders (Admin only)
   fastify.put('/bulk-sort-order', {
     schema: CategoryRoutesSchema.BulkUpdateSortOrder.schema,
     preHandler: [
@@ -111,7 +137,7 @@ export async function registerCategoryRoutes(fastify: FastifyInstance) {
     }
   });
 
-  // Category stats  
+  // GET /api/categories/admin/stats - Get category statistics (Admin only)
   fastify.get('/admin/stats', {
     schema: CategoryRoutesSchema.GetCategoryStats.schema,
     preHandler: [
