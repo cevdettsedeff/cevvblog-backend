@@ -34,55 +34,57 @@ export class BlogPostService implements IBlogPostService {
   }
 
   async create(dto: CreateBlogPostDto, authorId: string): Promise<BlogPostResponseDto> {
-    // Category is required
-    if (!dto.categoryId) {
-      throw new ValidationError('Category is required for all blog posts');
-    }
-
-    // Verify category exists
-    const categoryExists = await this.categoryRepository.exists(dto.categoryId);
-    if (!categoryExists) {
-      throw new NotFoundError('Category not found', { categoryId: dto.categoryId });
-    }
-
-    // Basic validation
-    if (!dto.title || dto.title.trim().length < 5) {
-      throw new ValidationError('Title must be at least 5 characters long');
-    }
-
-    if (!dto.content || dto.content.trim().length < 50) {
-      throw new ValidationError('Content must be at least 50 characters long');
-    }
-
-    if (dto.tags && dto.tags.length > 10) {
-      throw new ValidationError('Maximum 10 tags allowed');
-    }
-
-    if (dto.excerpt && dto.excerpt.length > 500) {
-      throw new ValidationError('Excerpt cannot exceed 500 characters');
-    }
-
-    // Generate unique slug
-    const baseSlug = slugify(dto.title, { lower: true, strict: true });
-    const slug = await this.generateUniqueSlug(baseSlug);
-
-    const isPublishing = dto.status === PostStatus.PUBLISHED || dto.isPublished;
-
-    const blogPostData: Partial<BlogPost> = {
-      ...dto,
-      slug,
-      authorId,
-      categoryId: dto.categoryId,
-      status: dto.status || PostStatus.DRAFT,
-      isPublished: isPublishing,
-      publishedAt: isPublishing ? new Date() : undefined,
-      viewCount: 0,
-      commentsCount: 0,
-    };
-
-    const blogPost = await this.blogPostRepository.create(blogPostData);
-    return this.mapToDto(blogPost);
+  // Author ID gerekli ve geçerli olmalı
+  if (!authorId || authorId.trim() === '') {
+    throw new ValidationError('Author ID is required for all blog posts');
   }
+
+  // Author'ın varlığını kontrol et
+  const authorExists = await this.blogPostRepository.exists(authorId); // Bu metodu User repository'de implement edin
+  if (!authorExists) {
+    throw new NotFoundError('Author not found', { authorId });
+  }
+
+  // Category kontrolü
+  if (!dto.categoryId) {
+    throw new ValidationError('Category is required for all blog posts');
+  }
+
+  const categoryExists = await this.categoryRepository.exists(dto.categoryId);
+  if (!categoryExists) {
+    throw new NotFoundError('Category not found', { categoryId: dto.categoryId });
+  }
+
+  // Diğer validasyonlar...
+  if (!dto.title || dto.title.trim().length < 5) {
+    throw new ValidationError('Title must be at least 5 characters long');
+  }
+
+  if (!dto.content || dto.content.trim().length < 50) {
+    throw new ValidationError('Content must be at least 50 characters long');
+  }
+
+  // Slug oluştur
+  const baseSlug = slugify(dto.title, { lower: true, strict: true });
+  const slug = await this.generateUniqueSlug(baseSlug);
+
+  const isPublishing = dto.status === PostStatus.PUBLISHED || dto.isPublished;
+
+  const blogPostData: Partial<BlogPost> = {
+    ...dto,
+    slug,
+    authorId, // Mutlaka set et
+    categoryId: dto.categoryId,
+    status: dto.status || PostStatus.DRAFT,
+    isPublished: isPublishing,
+    publishedAt: isPublishing ? new Date() : undefined,
+    viewCount: 0,
+    commentsCount: 0,
+  };
+
+  const blogPost = await this.blogPostRepository.create(blogPostData);
+  return this.mapToDto(blogPost);
+}
 
   async update(id: string, dto: UpdateBlogPostDto): Promise<BlogPostResponseDto> {
     const existingPost = await this.blogPostRepository.findById(id);
@@ -379,10 +381,15 @@ export class BlogPostService implements IBlogPostService {
     return Math.ceil(wordCount / wordsPerMinute);
   }
 
-  private mapToDto(blogPost: any): BlogPostResponseDto {
+private mapToDto(blogPost: any): BlogPostResponseDto {
     // Category is always required - throw error if missing
     if (!blogPost.category) {
       throw new Error(`Blog post ${blogPost.id} is missing required category`);
+    }
+
+    // Author is always required - throw error if missing
+    if (!blogPost.author) {
+      throw new Error(`Blog post ${blogPost.id} is missing required author`);
     }
 
     return {
@@ -402,11 +409,12 @@ export class BlogPostService implements IBlogPostService {
       createdAt: blogPost.createdAt,
       updatedAt: blogPost.updatedAt,
       author: {
-        id: blogPost.author?.id || '',
-        username: blogPost.author?.username || '',
-        firstName: blogPost.author?.firstName || '',
-        lastName: blogPost.author?.lastName || '',
-        avatar: blogPost.author?.avatar,
+        id: blogPost.author.id,
+        username: blogPost.author.username || '',
+        firstName: blogPost.author.firstName,
+        lastName: blogPost.author.lastName,
+        avatar: blogPost.author.avatar,
+        bio: blogPost.author.bio,
       },
       category: {
         id: blogPost.category.id,

@@ -1,4 +1,4 @@
-import { PostStatus } from "../../../domain/enums/PostStatus";
+import { PostStatus } from "@prisma/client";
 
 export interface BlogPostResponseDto {
   id: string;
@@ -9,7 +9,7 @@ export interface BlogPostResponseDto {
   featuredImage?: string;
   images: string[];
   tags: string[];
-  status: PostStatus; // Use enum for consistency
+  status: PostStatus;
   viewCount: number;
   isPublished: boolean;
   publishedAt?: Date;
@@ -21,6 +21,7 @@ export interface BlogPostResponseDto {
     firstName: string;
     lastName: string;
     avatar?: string;
+    bio?: string; // Bu satırı ekleyin
   };
   category: {
     id: string;
